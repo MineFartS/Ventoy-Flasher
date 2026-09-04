@@ -35,8 +35,6 @@ $dialog.InitialDirectory = [System.Environment+SpecialFolder]::MyComputer
 $dialog.Filter = 'Disk Images (*.iso; *.vhd)|*.iso;*.vhd'
 $dialog.ShowDialog() | Out-Null
 
-$SourceFile = $dialog.FileName
-
 #===========================================================================================================
 # Prompt for the USB Drive Number
 
@@ -64,3 +62,23 @@ Pop-Location
 
 #===========================================================================================================
 
+$Letter = (Get-Disk -Number $DriveNum | Get-Partition | Select-Object -First 1 | Get-Volume).DriveLetter
+
+$ISOs = @(
+    "rescuezilla-*.iso"
+    $dialog.FileName
+)
+
+$ISOs | ForEach-Object {
+
+    $ISO = (Resolve-Path $_).ProviderPath
+    
+    robocopy.exe `
+        (Split-Path $ISO) `
+        "$Letter`:\" `
+        (Split-Path $ISO -Leaf) `
+        /Z /R:5 /W:3
+
+}
+
+#===========================================================================================================
