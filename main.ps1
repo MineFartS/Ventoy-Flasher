@@ -22,8 +22,6 @@ $ErrorActionPreference = "Stop"
 
 Clear-Host
 
-Set-PSDebug -Trace 1
-
 Set-Location $PSScriptRoot
 
 #===========================================================================================================
@@ -40,14 +38,15 @@ $dialog.ShowDialog() | Out-Null
 $SourceFile = $dialog.FileName
 
 #===========================================================================================================
-# Prompt for the Output Drive
+# Prompt for the USB Drive Number
 
-$dialog = New-Object System.Windows.Forms.FolderBrowserDialog
-$dialog.Description = 'Select a Drive for Ventoy to be installed on'
-$dialog.RootFolder = [System.Environment+SpecialFolder]::MyComputer
-$dialog.ShowDialog() | Out-Null
+Get-Disk | Where-Object BusType -eq "USB" | Select-Object @(
+    "Number",
+    "FriendlyName",
+    @{Name="Size"; Expression={"{0:N2} GB" -f ($_.Size / 1GB)}}
+) | Format-Table | Out-Host
 
-$OutDrive = (Get-Partition -DriveLetter $dialog.SelectedPath[0] | Get-Disk)
+$DriveNum = Read-Host "Enter the Drive Number"
 
 #===========================================================================================================
 # Init Submodules
@@ -55,13 +54,13 @@ $OutDrive = (Get-Partition -DriveLetter $dialog.SelectedPath[0] | Get-Disk)
 git.exe submodule update --init --recursive
 
 #===========================================================================================================
+# Install Ventoy on USB Drive
 
 Push-Location "./ventoy"
 
-.\Ventoy2Disk.exe VTOYCLI /I /g /y /ly /PhyDrive:$($OutDrive.Number)
+.\Ventoy2Disk.exe VTOYCLI /I /g /y /PhyDrive:$DriveNum
 
 Pop-Location
 
 #===========================================================================================================
 
-Set-PSDebug -Off
