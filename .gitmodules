@@ -1,0 +1,6 @@
+
+[submodule "ventoy"]
+	path = ventoy
+	url = https://github.com/MineFartSEmbed/Ventoy
+    ignore = all
+
