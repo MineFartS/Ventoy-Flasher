@@ -49,16 +49,12 @@ $DriveNum = Read-Host "Enter the Drive Number"
 #===========================================================================================================
 # Init Submodules
 
-git.exe submodule update --init --recursive
+git.exe submodule update --init --recursive --remote
 
 #===========================================================================================================
 # Install Ventoy on USB Drive
 
-Push-Location "./ventoy"
-
-.\Ventoy2Disk.exe VTOYCLI /I /g /y /PhyDrive:$DriveNum
-
-Pop-Location
+& "ventoy\run.ps1" /I /g /y /PhyDrive:$DriveNum
 
 #===========================================================================================================
 
